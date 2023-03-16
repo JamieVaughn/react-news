@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useFetch } from './hooks/useFetch'
+import { NavLink, Outlet } from 'react-router-dom'
 import './App.css'
 
 // https://hacker-news.firebaseio.com/v0/item/8863.json?print=pretty
@@ -6,45 +7,43 @@ import './App.css'
 // beststories
 // newstories
 
-function App() {
-  const [topic, setTopic] = useState('top') // 'best', 'new'
-  const [ids, setIds] = useState([])
-  const [stories, setStories] = useState([])
-
-  useEffect(() => {
-    async function fetchIds (topic) {
-      const response = await fetch(`https://hacker-news.firebaseio.com/v0/${topic}stories.json?print=pretty`)
-      const data = await response.json()
-      setIds(data.slice(0, 20))
-      console.log('ids', ids)
-    }
-    fetchIds(topic)
-  }, [])
-
-  useEffect(() => {
-    async function fetchStories () {
-      const promisesArray = await ids.map(id => fetch(
-        `https://hacker-news.firebaseio.com/v0/item/${id}.json?print=pretty`
-        ).then(resp => resp.json()))
-    
-      const storiesArray = await Promise.all(promisesArray)
-      
-      setStories(storiesArray)
-      console.log('stories', storiesArray)
-    }
-    fetchStories()
-  }, [ids])
+function App(props) {
+  const { topic } = props
+  const stories = useFetch(topic)
+  console.log('stories', stories)
+  
+  // const {data, loading, error} = useGeneralFetch('https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty')
+  // if (loading) {
+  //   return 'Loading...'
+  // }
 
   return (
     <div className="App">
-      <h1>React News App</h1>
-      <ul>
+      <Outlet />
+
+      <ul className="stories-list">
         {
-          stories.map(story => (
-          <li key={story.id}>
-            <div>{story.score} : <a href={`https://news.ycombinator.com/item?id=${story.id}`}>{story.title}</a> - {story.by}</div>
-          </li>
-          ))
+          stories.map(story => {
+            let path
+            if('url' in story) {
+              path = `/${topic}/${story.id}?url=${story.url}`
+            } else if ('text' in story) {
+              path = `/${topic}/${story.id}?text=${story.text}`
+            }
+          return (
+            <li key={story.id}>
+              <div>{story.score} : 
+                <a href={`https://news.ycombinator.com/item?id=${story.id}`}>
+                  {story.title}
+                </a> -
+                <NavLink to={path}>
+                  [Show Source]
+                </NavLink> -
+                {story.by}
+              </div>
+            </li>
+           )
+          })
         }
       </ul>
     </div>

@@ -47,9 +47,23 @@ ul {
   list-style: none;
   text-align: left;
 }
-li {
+.stories-list li {
   border-bottom: 1px solid silver;
 }
+.nav-list {
+  display: flex;
+  justify-content: space-around;
+}
+.nav-list li {
+  padding: 0.5rem;
+  font-size: 0.75em;
+  cursor: pointer;
+}
+.active {
+  border: 1px solid silver;
+}
+
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
